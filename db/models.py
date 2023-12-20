@@ -34,20 +34,23 @@ class TestScore(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    test_id = db.Column(db.Integer, db.ForeignKey("tests.id"), nullable=False)
+    # index test_id since our aggregate endpoint relies on this
+    test_id = db.Column(db.Integer, db.ForeignKey("tests.id"), nullable=False, index=True)
     student_id = db.Column(db.Integer, db.ForeignKey("students.id"), nullable=False)
 
     # Maybe we need datetime to record the time the test was scanned in? 
     score = db.Column(db.Integer, nullable=False)
+    percent_score = db.Column(db.Float, nullable=False)
 
     student = relationship("Student", back_populates="test_scores")
     test = relationship("Test", back_populates="test_scores")
 
 
-def extract_data(root: ET.Element):
+def extract_data(root: ET.Element) -> int:
     """
     - xml: root element of xml data
     """
+    tally = 0
     # Iterate through each of the test result objects given
     for elem in root.findall("mcq-test-result"):
         first_name = elem.find("first-name").text
@@ -73,6 +76,8 @@ def extract_data(root: ET.Element):
 
         obtained_marks = int(summary_marks.attrib.get("obtained"))
 
+        percent_score = round((obtained_marks / available_marks) * 100, 2)
+
         # Existing entries 
         existing_student = Student.query.get(student_number)
         existing_test = Test.query.get(test_id)
@@ -93,24 +98,26 @@ def extract_data(root: ET.Element):
         
         if not existing_score:
             score = TestScore(
-                test_id=test_id, student_id=student_number, score=obtained_marks
+                test_id=test_id, student_id=student_number, score=obtained_marks, percent_score=percent_score
             )
             db.session.add(score)
         elif existing_score.score < obtained_marks:
             existing_score.score = obtained_marks
-        
+            existing_score.percent_score = percent_score
+        tally +=1 
     db.session.commit()
+    return tally 
 
 def get_test_score_summary(test_id: int): 
     scores = TestScore.query.filter_by(test_id=test_id).all()
     if len(scores) == 0:
         raise RuntimeError(f"No test found with test ID {test_id}")
     
-    dataset = np.array([score.score for score in scores])
+    dataset = np.array([score.percent_score for score in scores])
     return {
-        "mean": np.mean(dataset),
+        "mean": round(np.mean(dataset), 2),
         "median": np.median(dataset),
-        "stddev" : np.std(dataset),
+        "stddev" : round(np.std(dataset), 2),
         "min" : int(np.min(dataset)),
         "max" : int(np.max(dataset)),
         "count" : np.size(dataset),

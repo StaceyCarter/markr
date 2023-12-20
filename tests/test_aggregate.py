@@ -32,14 +32,15 @@ class TestImport(TestCase):
             agg_resp = client.get("/results/9863/aggregate")
         json_resp = json.loads(agg_resp.text)
 
-        self.assertEqual(json_resp['median'], 10.0)
-        self.assertEqual(json_resp['min'], 6)
-        self.assertEqual(json_resp['max'], 15)
-        self.assertEqual(round(json_resp['mean'], 2), 10.16)
-        self.assertEqual(round(json_resp['stddev'], 2), 1.98)
-        self.assertEqual(json_resp['p25'], 9.0)
-        self.assertEqual(json_resp['p50'], 10.0)
-        self.assertEqual(json_resp['p95'], 14.0)
+        self.assertEqual(json_resp['median'], 50.0)
+        self.assertEqual(json_resp['min'], 30.0)
+        self.assertEqual(json_resp['max'], 75.0)
+        self.assertEqual(round(json_resp['mean'], 2), 50.8)
+        self.assertEqual(round(json_resp['stddev'], 2), 9.92)
+        self.assertEqual(json_resp['p25'], 45.0)
+        self.assertEqual(json_resp['p50'], 50.0)
+        self.assertEqual(json_resp['p95'], 70.0)
+        self.assertEqual(json_resp['count'], 81)
 
     def test_aggregate__bad_test_id(self):
         """

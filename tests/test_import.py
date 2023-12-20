@@ -122,6 +122,7 @@ class TestImport(TestCase):
         self.assertEqual(score.student.id, mock_input.student_number)
         self.assertEqual(score.test.id, mock_input.test_id)
         self.assertEqual(score.test.available_marks, mock_input.available_marks)
+        self.assertEqual(score.percent_score, round((mock_input.obtained_marks / mock_input.available_marks) * 100, 2))
     
     def test_import__excess_fields(self):
         """

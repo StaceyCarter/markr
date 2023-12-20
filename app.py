@@ -10,13 +10,6 @@ _EXPECTED_DOC_TAG: str = "mcq-test-results"
 app = Flask(__name__)
 init_db(app)
 
-
-@app.route("/")
-def hello() -> Response:
-
-    return "<h1>hello there</h1>"
-
-
 @app.route("/import", methods=["POST"])
 def import_xml() -> Response:
     """
@@ -32,15 +25,14 @@ def import_xml() -> Response:
     
     if root.tag != _EXPECTED_DOC_TAG:
         abort(400, "Unexpected XML format")
-
-    resp = {"root": "hello"}
     
+    entries = 0
     try:
-        extract_data(root)
+       entries = extract_data(root)
     except RuntimeError as e: 
-        abort(400, "Error extracting test data: {e}")
+        abort(400, f"Error extracting test data: {e}")
 
-    return jsonify(resp)
+    return jsonify(f"Added/modified {entries} test scores")
 
 
 @app.route("/results/<test_id>/aggregate", methods=["GET"])

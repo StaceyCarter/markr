@@ -14,7 +14,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
+WORKDIR /markr
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
@@ -47,24 +47,3 @@ EXPOSE 4567
 
 # Run the application.
 CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=4567"]
-
-
-
-
-## 
-# FROM --platform=$BUILDPLATFORM python:3.11
-
-# WORKDIR /markr
-# COPY requirements.txt /markr
-# RUN pip3 install -r requirements.txt
-
-# COPY . .
-
-# ENV FLASK_APP app.py
-# ENV FLASK_ENV development
-# ENV FLASK_RUN_PORT 4567
-# ENV FLASK_RUN_HOST 0.0.0.0
-
-# EXPOSE 4567
-
-# CMD ["flask", "run", "--debug"]

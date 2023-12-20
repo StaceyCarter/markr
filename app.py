@@ -3,7 +3,8 @@ import os
 from flask import Flask, jsonify, Response, request, abort
 import xml.etree.ElementTree as ET
 
-from markr.db.models import db, Student, init_db, extract_data, get_test_score_summary
+from markr.db.models import db, Student, init_db
+from markr.db.db_helpers import extract_data, get_test_score_summary
 
 _EXPECTED_DOC_TAG: str = "mcq-test-results"
 
@@ -13,6 +14,7 @@ init_db(app)
 @app.route("/import", methods=["POST"])
 def import_xml() -> Response:
     """
+    Accepts XML formatted test scores to be processed and added to the DB.
     """
     if request.content_type != 'text/xml+markr':
         abort(400, "content_type must be text/xml+markr")
@@ -37,6 +39,10 @@ def import_xml() -> Response:
 
 @app.route("/results/<test_id>/aggregate", methods=["GET"])
 def aggregate_test_results(test_id: str) -> Response:
+    """
+    Provides aggregate statistics (p50|25|75, mean, stddev etc) 
+    pertaining to the given test_id. 
+    """
     try: 
         test_id = int(test_id)
     except ValueError:

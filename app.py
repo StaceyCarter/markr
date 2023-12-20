@@ -3,7 +3,7 @@ import os
 from flask import Flask, jsonify, Response, request
 import xml.etree.ElementTree as ET
 
-from db.models import db, Student, init_db, extract_data
+from db.models import db, Student, init_db, extract_data, get_test_score_summary
 
 app = Flask(__name__)
 init_db(app)
@@ -32,5 +32,7 @@ def import_xml() -> Response:
 
 @app.route("/results/<test_id>/aggregate", methods=["GET"])
 def aggregate_test_results(test_id: str) -> Response:
-    resp = {"test id": test_id}
+    # TODO: Error handling for int conversion
+    resp = get_test_score_summary(int(test_id))
+
     return jsonify(resp)

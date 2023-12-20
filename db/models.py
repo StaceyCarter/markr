@@ -4,6 +4,9 @@ from flask_migrate import Migrate
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import Session
 
+import numpy as np
+import pandas as pd
+
 db = SQLAlchemy()
 
 class Student(db.Model):
@@ -74,6 +77,17 @@ def extract_data(root: ET.Element):
         
     db.session.commit()
 
+def get_test_score_summary(test_id: int): 
+    scores = TestScore.query.filter_by(test_id=test_id).all() 
+    dataset = np.array([score.score for score in scores])
+
+    return {
+        "mean": np.mean(dataset),
+        "median": np.median(dataset),
+        "p25": np.percentile(dataset, 25),
+        "p50": np.percentile(dataset, 50),
+        "p95": np.percentile(dataset, 95),
+    }
 
 def init_db(app):
     """
